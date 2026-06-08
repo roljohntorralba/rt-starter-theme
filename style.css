@@ -1,0 +1,15 @@
+/*
+Theme Name: RT Starter Theme
+Theme URI: https://example.com/rt-starter-theme
+Author: RT
+Author URI: https://example.com
+Description: A thin, no-build parent block theme that defines the standardized design-token vocabulary. All functionality lives in the RT Blocks plugin; child themes rebrand by overriding tokens only.
+Version: 1.0.0
+Requires at least: 6.5
+Tested up to: 6.7
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: rt-starter
+Tags: full-site-editing, block-styles
+*/
