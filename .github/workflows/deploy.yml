@@ -1,0 +1,43 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      PROD_PATH: htdocs/thebestvpn.com/wp-content/themes/rt-starter-theme
+      STAGING_PATH: htdocs/thebestvpn.com/staging/wp-content/themes/rt-starter-theme
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          PORT="${{ secrets.SSH_PORT }}"
+          ssh-keyscan -p "${PORT:-22}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy to production
+        run: |
+          PORT="${{ secrets.SSH_PORT }}"
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p ${PORT:-22}" \
+            --exclude='.git' --exclude='.github' --exclude='.gitignore' \
+            ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:$PROD_PATH/"
+
+      - name: Deploy to staging
+        run: |
+          PORT="${{ secrets.SSH_PORT }}"
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p ${PORT:-22}" \
+            --exclude='.git' --exclude='.github' --exclude='.gitignore' \
+            ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:$STAGING_PATH/"
